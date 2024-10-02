@@ -11,7 +11,7 @@ const TelegramBot = require("node-telegram-bot-api");
 const login = config.telegram.login;
 const bot = new TelegramBot(config.telegram.token, { polling: true });
 
-bot.onText(`^\/start@${login}$`, (msg) => {
+bot.onText(`^\/start$`, (msg) => {
   const chatId = msg.chat.id;
   bot.sendMessage(chatId, `Hello!`);
 });
@@ -21,7 +21,7 @@ bot.onText(`^\/test$`, (msg) => {
   fs.writeFileSync("./input.txt", `1\n${user_login}\n1\n`, "utf8");
 
   const input = fs.createReadStream("./input.txt");
-  const child = spawn("cmd.exe", ["/c", "test.bat"]);
+  const child = spawn("/root/openvpn-config.sh");
   input.pipe(child.stdin);
 });
 
