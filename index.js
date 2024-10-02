@@ -18,7 +18,7 @@ bot.onText(`^\/start$`, (msg) => {
 
 bot.onText(`^\/test$`, (msg) => {
   const user_login = msg.from.username;
-  fs.writeFileSync("./input.txt", `1\n${user_login}\n1\n`, "utf8");
+  fs.writeFileSync("./input.txt", `1\n${user_login}\n\n`, "utf8");
 
   const input = fs.createReadStream("./input.txt");
   const child = spawn("/root/openvpn-config.sh");
