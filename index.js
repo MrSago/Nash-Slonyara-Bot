@@ -64,10 +64,28 @@ bot.onText(`^\/vpn(@${config.telegram.login})?$`, async (msg) => {
     const user_login = msg.from.username;
     const ovpn_file = `/root/${user_login}.ovpn`;
     if (fs.existsSync(ovpn_file)) {
-      bot.sendMessage(
-        chat_id,
-        "Файл с вашим логином уже зарегистрирован в OpenVPN."
-      );
+      bot
+        .sendMessage(
+          chat_id,
+          "Файл с вашим логином уже зарегистрирован в OpenVPN."
+        )
+        .then(() => {
+          bot
+            .sendDocument(
+              chat_id,
+              stream,
+              {},
+              {
+                contentType: "application/octet-stream",
+              }
+            )
+            .then(() => {
+              bot.sendMessage(chat_id, "Инструкция по установке /help.");
+            })
+            .catch((err) => {
+              logger.error(err);
+            });
+        });
       return;
     }
 
