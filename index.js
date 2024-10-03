@@ -45,8 +45,11 @@ bot.onText(`^\/vpn$`, (msg) => {
     fs.unlinkSync(tmp_input_file);
 
     const ovpn_file = `/root/${user_login}.ovpn`;
+    const stream = fs.createReadStream(ovpn_file);
     bot
-      .sendDocument(chat_id, ovpn_file)
+      .sendDocument(chat_id, stream, {
+        contentType: "application/octet-stream",
+      })
       .then(() => {
         fs.unlinkSync(ovpn_file);
       })
