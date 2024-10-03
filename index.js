@@ -6,7 +6,6 @@ const config = require("./environment.js");
 const logger = require("./logger.js");
 
 const TelegramBot = require("node-telegram-bot-api");
-const { error } = require("console");
 
 logger.init("info");
 
@@ -31,7 +30,7 @@ bot.onText(`^\/vpn$`, (msg) => {
   const user_login = msg.from.username;
   const tmp_input_file = `${os.tmpdir()}/${user_login}`;
 
-  fs.writeFileSync(tmp_input_file, `1\n${user_login}\n\n`, "utf8");
+  fs.writeFileSync(tmp_input_file, `1\n${user_login}\n1\n`, "utf8");
 
   const input = fs.createReadStream(tmp_input_file);
   const child = spawn("/root/openvpn-config.sh");
@@ -43,13 +42,13 @@ bot.onText(`^\/vpn$`, (msg) => {
   child.on("close", (code) => {
     logger.info(`child process exited with code ${code}`);
 
-    // fs.unlinkSync(tmp_input_file);
+    fs.unlinkSync(tmp_input_file);
 
     const ovpn_file = `/root/${user_login}.ovpn`;
     bot
       .sendDocument(chat_id, ovpn_file)
       .then(() => {
-        // fs.unlinkSync(ovpn_file);
+        fs.unlinkSync(ovpn_file);
       })
       .catch((err) => {
         logger.error(err);
