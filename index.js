@@ -37,17 +37,21 @@ bot.onText(`^\/vpn$`, (msg) => {
   const child = spawn("/root/openvpn-config.sh");
   input.pipe(child.stdin);
 
-  fs.rmSync(tmp_input_file);
+  child.on("close", (code) => {
+    logger.info(`child process exited with code ${code}`);
 
-  const ovpn_file = `/root/${user_login}.ovpn`;
-  bot
-    .sendDocument(chat_id, ovpn_file)
-    .then(() => {
-      fs.rmSync(ovpn_file);
-    })
-    .catch((err) => {
-      logger.error(err);
-    });
+    // fs.unlinkSync(tmp_input_file);
+
+    const ovpn_file = `/root/${user_login}.ovpn`;
+    bot
+      .sendDocument(chat_id, ovpn_file)
+      .then(() => {
+        // fs.unlinkSync(ovpn_file);
+      })
+      .catch((err) => {
+        logger.error(err);
+      });
+  });
 });
 
 logger.info("Nash-Slonyara-Bot started!");
