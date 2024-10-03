@@ -4,6 +4,7 @@ const { spawn } = require("child_process");
 
 const config = require("./environment.js");
 const logger = require("./logger.js");
+const helpMessages = require("./help_messages.js");
 
 const TelegramBot = require("node-telegram-bot-api");
 
@@ -17,26 +18,26 @@ bot.on("polling_error", (error) => {
 
 bot.onText(`^\/start(@${config.telegram.login})?$`, (msg) => {
   const chat_id = msg.chat.id;
-  bot.sendMessage(
-    chat_id,
-    "Здарова! Чтобы получить файл ovpn введите команду /vpn. Для справки введите /help."
-  );
+  bot.sendMessage(chat_id, helpMessages.startMessage, {
+    parse_mode: "Markdown",
+  });
 });
 
 bot.onText(`^\/help(@${config.telegram.login})?$`, (msg) => {
   const chat_id = msg.chat.id;
-  bot.sendMessage(
-    chat_id,
-    "Инструкция по установке и настройке OpenVPN: " +
-      "[здесь](https://wiki.aeza.net/openvpn-sozdanie-lichnoi-virtualnoi-chastnoi-seti#id-3.-skachivanie-i-podklyuchenie-klienta-openvpn-na-pk)\n" +
-      "Аналогично делается для мобильных устройств.\n" +
-      "OpenVPN для [Windows](https://openvpn.net/community-downloads/) " +
-      "и [Android](https://play.google.com/store/apps/details?id=net.openvpn.openvpn&hl=ru) версии.",
-    { parse_mode: "Markdown" }
-  );
+  bot.sendMessage(chat_id, helpMessages.helpMessage, {
+    parse_mode: "Markdown",
+  });
 });
 
-bot.onText(`^\/vpn(@${config.telegram.login})?$`, async (msg) => {
+bot.onText(`^\/android(@${config.telegram.login})?$`, (msg) => {
+  const chat_id = msg.chat.id;
+  bot.sendMessage(chat_id, helpMessages.androidMessage, {
+    parse_mode: "Markdown",
+  });
+});
+
+bot.onText(`^\/ovpn(@${config.telegram.login})?$`, async (msg) => {
   try {
     const chat_id = msg.chat.id;
     if (msg.chat.type !== "private") {
@@ -67,7 +68,7 @@ bot.onText(`^\/vpn(@${config.telegram.login})?$`, async (msg) => {
       bot
         .sendMessage(
           chat_id,
-          "Файл с вашим логином уже зарегистрирован в OpenVPN."
+          "Ключ с вашим логином уже зарегистрирован в OpenVPN."
         )
         .then(() => {
           const stream = fs.createReadStream(ovpn_file);
@@ -103,12 +104,11 @@ bot.onText(`^\/vpn(@${config.telegram.login})?$`, async (msg) => {
     child.stderr.pipe(process.stderr);
 
     child.on("close", (code) => {
-      logger.info(`child process exited with code ${code}`);
+      logger.info(`Child process exited with code ${code}`);
 
       fs.unlinkSync(tmp_input_file);
 
       const stream = fs.createReadStream(ovpn_file);
-
       bot
         .sendDocument(
           chat_id,
