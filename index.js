@@ -70,6 +70,7 @@ bot.onText(`^\/vpn(@${config.telegram.login})?$`, async (msg) => {
           "Файл с вашим логином уже зарегистрирован в OpenVPN."
         )
         .then(() => {
+          const stream = fs.createReadStream(ovpn_file);
           bot
             .sendDocument(
               chat_id,
