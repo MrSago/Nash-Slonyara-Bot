@@ -27,7 +27,7 @@ bot.onText(`^\/vpn(@${config.telegram.login})?$`, async (msg) => {
   try {
     const chat_id = msg.chat.id;
     if (msg.chat.type !== "private") {
-      console.log(char_id);
+      console.log(chat_id);
 
       bot.sendMessage(
         chat_id,
