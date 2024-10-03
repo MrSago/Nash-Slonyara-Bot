@@ -15,7 +15,7 @@ bot.on("polling_error", (error) => {
   logger.error(error);
 });
 
-bot.onText(`^\/start(@${config.telegram.login})$`, (msg) => {
+bot.onText(`^\/start(@${config.telegram.login})?$`, (msg) => {
   const chat_id = msg.chat.id;
   bot.sendMessage(
     chat_id,
@@ -23,7 +23,7 @@ bot.onText(`^\/start(@${config.telegram.login})$`, (msg) => {
   );
 });
 
-bot.onText(`^\/vpn$`, async (msg) => {
+bot.onText(`^\/vpn(@${config.telegram.login})?$`, async (msg) => {
   const chat_id = msg.chat.id;
   if (msg.chat.type !== "private") {
     bot.sendMessage(
