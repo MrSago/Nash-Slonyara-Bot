@@ -49,7 +49,11 @@ bot.onText(`^\/vpn(@${config.telegram.login})?$`, async (msg) => {
 
     const user_id = msg.from.id;
     const member = await bot.getChatMember(config.telegram.group_id, user_id);
-    if (member.status !== "administrator" && member.status !== "creator") {
+    if (
+      member.status !== "member" &&
+      member.status !== "administrator" &&
+      member.status !== "creator"
+    ) {
       bot.sendMessage(
         chat_id,
         "Эта команда доступна только участникам приватной группы!"
