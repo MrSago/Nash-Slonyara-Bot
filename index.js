@@ -23,9 +23,27 @@ bot.onText(`^\/start$`, (msg) => {
   );
 });
 
-bot.onText(`^\/vpn$`, (msg) => {
+bot.onText(`^\/vpn$`, async (msg) => {
   const chat_id = msg.chat.id;
-  bot.sendMessage(chat_id, "Ваш файлик подготавливается, ожидайте...");
+  if (msg.chat.type !== "private") {
+    bot.sendMessage(
+      chat_id,
+      "Эта команда доступна только в личных сообщениях бота!"
+    );
+    return;
+  }
+
+  const user_id = msg.from.id;
+  const member = await bot.getChatMember(config.telegram.group_id, user_id);
+  if (member.status !== "administrator" && member.status !== "creator") {
+    bot.sendMessage(
+      chat_id,
+      "Эта команда доступна только участникам приватной группы!"
+    );
+    return;
+  }
+
+  await bot.sendMessage(chat_id, "Ваш файлик подготавливается, ожидайте...");
 
   const user_login = msg.from.username;
   const tmp_input_file = `${os.tmpdir()}/${user_login}`;
@@ -47,9 +65,14 @@ bot.onText(`^\/vpn$`, (msg) => {
     const ovpn_file = `/root/${user_login}.ovpn`;
     const stream = fs.createReadStream(ovpn_file);
     bot
-      .sendDocument(chat_id, stream, {}, {
-        contentType: "application/octet-stream",
-      })
+      .sendDocument(
+        chat_id,
+        stream,
+        {},
+        {
+          contentType: "application/octet-stream",
+        }
+      )
       .then(() => {
         fs.unlinkSync(ovpn_file);
       })
