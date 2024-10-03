@@ -57,6 +57,7 @@ bot.onText(`^\/vpn(@${config.telegram.login})?$`, async (msg) => {
       return;
     }
 
+    const user_login = msg.from.username;
     const ovpn_file = `/root/${user_login}.ovpn`;
     if (fs.existsSync(ovpn_file)) {
       bot.sendMessage(
@@ -68,9 +69,7 @@ bot.onText(`^\/vpn(@${config.telegram.login})?$`, async (msg) => {
 
     await bot.sendMessage(chat_id, "Ваш файлик подготавливается, ожидайте...");
 
-    const user_login = msg.from.username;
     const tmp_input_file = `${os.tmpdir()}/${user_login}`;
-
     fs.writeFileSync(tmp_input_file, `1\n${user_login}\n1\n`, "utf8");
 
     const input = fs.createReadStream(tmp_input_file);
