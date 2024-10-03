@@ -1,32 +1,53 @@
 const fs = require("fs");
-const { spawn } = require('child_process');
+const os = require("os");
+const { spawn } = require("child_process");
 
 const config = require("./environment.js");
 const logger = require("./logger.js");
 
+const TelegramBot = require("node-telegram-bot-api");
+const { error } = require("console");
+
 logger.init("info");
 
-const TelegramBot = require("node-telegram-bot-api");
-
-const login = config.telegram.login;
 const bot = new TelegramBot(config.telegram.token, { polling: true });
 
-bot.onText(`^\/start$`, (msg) => {
-  const chatId = msg.chat.id;
-  bot.sendMessage(chatId, `Hello!`);
+bot.on("polling_error", (error) => {
+  logger.error(error);
 });
 
-bot.onText(`^\/test$`, (msg) => {
-  const user_login = msg.from.username;
-  fs.writeFileSync("./input.txt", `1\n${user_login}\n\n`, "utf8");
+bot.onText(`^\/start$`, (msg) => {
+  const chat_id = msg.chat.id;
+  bot.sendMessage(
+    chat_id,
+    "Здарова! Чтобы получить файл ovpn введите команду /vpn"
+  );
+});
 
-  const input = fs.createReadStream("./input.txt");
+bot.onText(`^\/vpn$`, (msg) => {
+  const chat_id = msg.chat.id;
+  bot.sendMessage(chat_id, "Ваш файлик подготавливается, ожидайте...");
+
+  const user_login = msg.from.username;
+  const tmp_input_file = `${os.tmpdir()}/${user_login}`;
+
+  fs.writeFileSync(tmp_input_file, `1\n${user_login}\n\n`, "utf8");
+
+  const input = fs.createReadStream(tmp_input_file);
   const child = spawn("/root/openvpn-config.sh");
   input.pipe(child.stdin);
-});
 
-bot.on("polling_error", (error) => {
-  console.error(error);
+  fs.rmSync(tmp_input_file);
+
+  const ovpn_file = `/root/${user_login}.ovpn`;
+  bot
+    .sendDocument(chat_id, ovpn_file)
+    .then(() => {
+      fs.rmSync(ovpn_file);
+    })
+    .catch((err) => {
+      logger.error(err);
+    });
 });
 
 logger.info("Nash-Slonyara-Bot started!");
