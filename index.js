@@ -37,6 +37,9 @@ bot.onText(`^\/vpn$`, (msg) => {
   const child = spawn("/root/openvpn-config.sh");
   input.pipe(child.stdin);
 
+  child.stdout.pipe(process.stdout);
+  child.stderr.pipe(process.stderr);
+
   child.on("close", (code) => {
     logger.info(`child process exited with code ${code}`);
 
