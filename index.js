@@ -27,10 +27,10 @@ bot.onText(`^\/help(@${config.telegram.login})?$`, (msg) => {
   const chat_id = msg.chat.id;
   bot.sendMessage(
     chat_id,
-    "Инструкция по установке VPN: " +
-      "[Здесь](https://wiki.aeza.net/openvpn-sozdanie-lichnoi-virtualnoi-chastnoi-seti#id-3.-skachivanie-i-podklyuchenie-klienta-openvpn-na-pk)\n" +
+    "Инструкция по установке и настройке OpenVPN: " +
+      "[здесь](https://wiki.aeza.net/openvpn-sozdanie-lichnoi-virtualnoi-chastnoi-seti#id-3.-skachivanie-i-podklyuchenie-klienta-openvpn-na-pk)\n" +
       "Аналогично делается для мобильных устройств.\n" +
-      "[Dekstop](https://openvpn.net/community-downloads/) " +
+      "OpenVPN для [Windows](https://openvpn.net/community-downloads/) " +
       "и [Android](https://play.google.com/store/apps/details?id=net.openvpn.openvpn&hl=ru) версии.",
     { parse_mode: "Markdown" }
   );
@@ -57,6 +57,15 @@ bot.onText(`^\/vpn(@${config.telegram.login})?$`, async (msg) => {
       return;
     }
 
+    const ovpn_file = `/root/${user_login}.ovpn`;
+    if (fs.existsSync(ovpn_file)) {
+      bot.sendMessage(
+        chat_id,
+        "Файл с вашим логином уже зарегистрирован в OpenVPN."
+      );
+      return;
+    }
+
     await bot.sendMessage(chat_id, "Ваш файлик подготавливается, ожидайте...");
 
     const user_login = msg.from.username;
@@ -65,7 +74,8 @@ bot.onText(`^\/vpn(@${config.telegram.login})?$`, async (msg) => {
     fs.writeFileSync(tmp_input_file, `1\n${user_login}\n1\n`, "utf8");
 
     const input = fs.createReadStream(tmp_input_file);
-    const child = spawn("/root/openvpn-config.sh");
+    const openvpn_config_file = "/root/openvpn-config.sh";
+    const child = spawn(openvpn_config_file);
     input.pipe(child.stdin);
     child.stdout.pipe(process.stdout);
     child.stderr.pipe(process.stderr);
@@ -75,7 +85,6 @@ bot.onText(`^\/vpn(@${config.telegram.login})?$`, async (msg) => {
 
       fs.unlinkSync(tmp_input_file);
 
-      const ovpn_file = `/root/${user_login}.ovpn`;
       const stream = fs.createReadStream(ovpn_file);
 
       bot
@@ -88,7 +97,7 @@ bot.onText(`^\/vpn(@${config.telegram.login})?$`, async (msg) => {
           }
         )
         .then(() => {
-          fs.unlinkSync(ovpn_file);
+          bot.sendMessage(chat_id, "Инструкция по установке /help.");
         })
         .catch((err) => {
           logger.error(err);
