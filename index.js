@@ -15,7 +15,7 @@ bot.on("polling_error", (error) => {
   logger.error(error);
 });
 
-bot.onText(`^\/start$`, (msg) => {
+bot.onText(`^\/start(@${config.telegram.login})$`, (msg) => {
   const chat_id = msg.chat.id;
   bot.sendMessage(
     chat_id,
