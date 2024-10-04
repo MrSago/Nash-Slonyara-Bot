@@ -4,7 +4,8 @@ const startMessage =
   "/start - запуск бота\n" +
   "/help - инструкция по установке и настройке OpenVPN\n" +
   "/android - рекомендуемые настройки для Android\n" +
-  "/ovpn - получение OpenVPN-ключа";
+  "/ovpn - получение OpenVPN-ключа" +
+  "/list - список зарегистрированных OpenVPN-ключей";
 
 const helpMessage =
   "*Инструкция по установке и настройке OpenVPN*\n\n" +
