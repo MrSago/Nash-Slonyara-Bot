@@ -130,25 +130,14 @@ bot.onText(`^\/ovpn(@${config.telegram.login})?$`, async (msg) => {
   }
 });
 
-bot.onText(`^\/info(@${config.telegram.login})?$`, async (msg) => {
+bot.onText(`^\/list(@${config.telegram.login})?$`, async (msg) => {
   try {
-    const group_id = config.telegram.group_id;
-    const group_members = await bot.getChatMembers(group_id);
-
     const files = fs.readdirSync("/root/");
     const ovpn_files = files.filter((file) => file.endsWith(".ovpn"));
 
-    const user_status = {};
-    for (const member of group_members) {
-      const user_login = member.user.username;
-      const has_file = ovpn_files.some((file) => file === `${user_login}.ovpn`);
-      user_status[user_login] = has_file ? "created" : "not created";
-    }
-
-    let info_message =
-      "Статус создания файла для каждого участника группы:\n\n";
-    for (const user_login in user_status) {
-      info_message += `${user_login}: ${user_status[user_login]}\n`;
+    let info_message = "Список OpenVPN-ключей:\n\n";
+    for (const file in ovpn_files) {
+      info_message += `${file}\n`;
     }
 
     const chat_id = msg.chat.id;
