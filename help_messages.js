@@ -9,7 +9,7 @@ const startMessage =
 
 const helpMessage =
   "*Инструкция по установке и настройке OpenVPN*\n\n" +
-  "1. Получите OpenVPN-ключ (.ovpn) с помощью команды /ovpn в личном чате боте.\n" +
+  "1. Получите OpenVPN-ключ (.ovpn) с помощью команды /ovpn в личном чате бота @nash_slonyara_vpn_bot.\n" +
   "2.1. Установите и настройте OpenVPN согласно [инструкции](https://wiki.aeza.net/openvpn-sozdanie-lichnoi-virtualnoi-chastnoi-seti#id-3.-skachivanie-i-podklyuchenie-klienta-openvpn-na-pk) (п.3).\n" +
   "2.2. Настройка для Android и iOS выглядит аналогично.\n" +
   "3. Пользуемся!\n\n" +
