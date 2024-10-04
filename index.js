@@ -137,7 +137,7 @@ bot.onText(`^\/list(@${config.telegram.login})?$`, async (msg) => {
 
     let info_message = "Список OpenVPN-ключей:\n\n";
     for (const file in ovpn_files) {
-      info_message += `${file}\n`;
+      info_message += `${ovpn_files[file]}\n`;
     }
 
     const chat_id = msg.chat.id;
