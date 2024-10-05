@@ -65,15 +65,16 @@ bot.onText(`^\/android(@${config.telegram.login})?$`, (msg) => {
 
 bot.onText(`^\/ovpn(@${config.telegram.login})?$`, async (msg) => {
   try {
-    if (!helpers.IsPrivateChat(bot, msg)) {
-      return;
-    }
-
     if (!helpers.UserInPrivateGroup(bot, msg, config.telegram.group_id)) {
       return;
     }
 
-    const ovpn_file = `/root/${msg.from.username}.ovpn`;
+    if (!helpers.IsPrivateChat(bot, msg)) {
+      return;
+    }
+
+    const user_login = msg.from.username;
+    const ovpn_file = `/root/${user_login}.ovpn`;
     if (helpers.OVPNFileExists(bot, msg, ovpn_file)) {
       return;
     }
@@ -81,7 +82,6 @@ bot.onText(`^\/ovpn(@${config.telegram.login})?$`, async (msg) => {
     const chat_id = msg.chat.id;
     await bot.sendMessage(chat_id, "Ваш файлик подготавливается, ожидайте...");
 
-    const user_login = msg.from.username;
     const tmp_input_file = `${os.tmpdir()}/${user_login}`;
     fs.writeFileSync(tmp_input_file, `1\n${user_login}\n1\n`, "utf8");
 
