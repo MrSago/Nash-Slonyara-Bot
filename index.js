@@ -1,10 +1,10 @@
 const fs = require("fs");
 const os = require("os");
-const { spawn } = require("child_process");
 
 const config = require("./environment.js");
 const logger = require("./logger.js");
-const helpMessages = require("./help_messages.js");
+const messages = require("./messages.js");
+const helpers = require("./helpers.js");
 
 const TelegramBot = require("node-telegram-bot-api");
 
@@ -17,131 +17,103 @@ bot.on("polling_error", (error) => {
 });
 
 bot.onText(`^\/start(@${config.telegram.login})?$`, (msg) => {
-  const chat_id = msg.chat.id;
-  bot.sendMessage(chat_id, helpMessages.startMessage, {
-    parse_mode: "Markdown",
-  });
+  try {
+    const chat_id = msg.chat.id;
+    if (!helpers.UserInPrivateGroup(bot, msg, config.telegram.group_id)) {
+      bot.sendMessage(
+        chat_id,
+        "Этот бот доступен только участникам приватной группы! Ухади..."
+      );
+      return;
+    }
+
+    bot.sendMessage(chat_id, messages.start, {
+      parse_mode: "Markdown",
+    });
+  } catch (err) {
+    logger.error(err.stack);
+  }
 });
 
 bot.onText(`^\/help(@${config.telegram.login})?$`, (msg) => {
-  const chat_id = msg.chat.id;
-  bot.sendMessage(chat_id, helpMessages.helpMessage, {
-    parse_mode: "Markdown",
-  });
+  try {
+    if (!helpers.UserInPrivateGroup(bot, msg, config.telegram.group_id)) {
+      return;
+    }
+
+    bot.sendMessage(msg.chat.id, messages.help, {
+      parse_mode: "Markdown",
+    });
+  } catch (err) {
+    logger.error(err.stack);
+  }
 });
 
 bot.onText(`^\/android(@${config.telegram.login})?$`, (msg) => {
-  const chat_id = msg.chat.id;
-  bot.sendMessage(chat_id, helpMessages.androidMessage, {
-    parse_mode: "Markdown",
-  });
+  try {
+    if (!helpers.UserInPrivateGroup(bot, msg, config.telegram.group_id)) {
+      return;
+    }
+
+    bot.sendMessage(msg.chat.id, messages.android, {
+      parse_mode: "Markdown",
+    });
+  } catch (err) {
+    logger.error(err.stack);
+  }
 });
 
 bot.onText(`^\/ovpn(@${config.telegram.login})?$`, async (msg) => {
   try {
+    if (!helpers.IsPrivateChat(bot, msg)) {
+      return;
+    }
+
+    if (!helpers.UserInPrivateGroup(bot, msg, config.telegram.group_id)) {
+      return;
+    }
+
+    const ovpn_file = `/root/${msg.from.username}.ovpn`;
+    if (helpers.OVPNFileExists(bot, msg, ovpn_file)) {
+      return;
+    }
+
     const chat_id = msg.chat.id;
-    if (msg.chat.type !== "private") {
-      bot.sendMessage(
-        chat_id,
-        "Эта команда доступна только в личных сообщениях бота!"
-      );
-      return;
-    }
-
-    const user_id = msg.from.id;
-    const member = await bot.getChatMember(config.telegram.group_id, user_id);
-    if (
-      member.status !== "member" &&
-      member.status !== "administrator" &&
-      member.status !== "creator"
-    ) {
-      bot.sendMessage(
-        chat_id,
-        "Эта команда доступна только участникам приватной группы!"
-      );
-      return;
-    }
-
-    const user_login = msg.from.username;
-    const ovpn_file = `/root/${user_login}.ovpn`;
-    if (fs.existsSync(ovpn_file)) {
-      bot
-        .sendMessage(
-          chat_id,
-          "Ключ с вашим логином уже зарегистрирован в OpenVPN."
-        )
-        .then(() => {
-          const stream = fs.createReadStream(ovpn_file);
-          bot
-            .sendDocument(
-              chat_id,
-              stream,
-              {},
-              {
-                contentType: "application/octet-stream",
-              }
-            )
-            .then(() => {
-              bot.sendMessage(chat_id, "Инструкция по установке /help.");
-            })
-            .catch((err) => {
-              logger.error(err);
-            });
-        });
-      return;
-    }
-
     await bot.sendMessage(chat_id, "Ваш файлик подготавливается, ожидайте...");
 
+    const user_login = msg.from.username;
     const tmp_input_file = `${os.tmpdir()}/${user_login}`;
     fs.writeFileSync(tmp_input_file, `1\n${user_login}\n1\n`, "utf8");
 
-    const input = fs.createReadStream(tmp_input_file);
-    const openvpn_config_file = "/root/openvpn-config.sh";
-    const child = spawn(openvpn_config_file);
-    input.pipe(child.stdin);
-    child.stdout.pipe(process.stdout);
-    child.stderr.pipe(process.stderr);
-
-    child.on("close", (code) => {
-      logger.info(`Child process exited with code ${code}`);
-
-      fs.unlinkSync(tmp_input_file);
-
-      const stream = fs.createReadStream(ovpn_file);
-      bot
-        .sendDocument(
-          chat_id,
-          stream,
-          {},
-          {
-            contentType: "application/octet-stream",
-          }
-        )
-        .then(() => {
-          bot.sendMessage(chat_id, "Инструкция по установке /help.");
-        })
-        .catch((err) => {
-          logger.error(err);
-        });
-    });
+    helpers.createOVPNFile(bot, chat_id, tmp_input_file, ovpn_file);
   } catch (err) {
-    logger.error(err);
+    logger.error(err.stack);
   }
 });
 
 bot.onText(`^\/list(@${config.telegram.login})?$`, async (msg) => {
   try {
-    const files = fs.readdirSync("/root/");
+    if (!helpers.UserInPrivateGroup(bot, msg, config.telegram.group_id)) {
+      return;
+    }
+
+    const chat_id = msg.chat.id;
+    const root_dir = "/root/";
+    if (!fs.existsSync(root_dir)) {
+      logger.error(`Directory ${root_dir} not found!`);
+      bot.sendMessage(chat_id, messages.internalError);
+      return;
+    }
+
+    const files = fs.readdirSync(root_dir);
     const ovpn_files = files.filter((file) => file.endsWith(".ovpn"));
 
     const info_message =
       "Список зарегистрированных OpenVPN-ключей:\n\n" + ovpn_files.join("\n");
 
-    const chat_id = msg.chat.id;
     bot.sendMessage(chat_id, info_message);
   } catch (err) {
-    logger.error(err);
+    logger.error(err.stack);
   }
 });
 
