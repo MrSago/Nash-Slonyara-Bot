@@ -111,7 +111,7 @@ bot.onText(`^\/connections(@${config.telegram.login})?$`, (msg) => {
   try {
     const chat_id = msg.chat.id;
 
-    if (msg.from.id !== config.telegram.creator_id) {
+    if (msg.from.id != config.telegram.creator_id) {
       bot.sendMessage(chat_id, "Эта команда доступна только создателю бота!");
       return;
     }
@@ -135,7 +135,7 @@ bot.onText(`^\/routes(@${config.telegram.login})?$`, (msg) => {
   try {
     const chat_id = msg.chat.id;
 
-    if (msg.from.id !== config.telegram.creator_id) {
+    if (msg.from.id != config.telegram.creator_id) {
       bot.sendMessage(chat_id, "Эта команда доступна только создателю бота!");
       return;
     }
