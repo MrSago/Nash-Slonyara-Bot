@@ -99,9 +99,14 @@ bot.onText(`^\/list(@${config.telegram.login})?$`, async (msg) => {
     const ovpn_files = files.filter((file) => file.endsWith(".ovpn"));
 
     const info_message =
-      "Список зарегистрированных OpenVPN-ключей:\n\n" + ovpn_files.join("\n");
+      "*Список зарегистрированных OpenVPN-ключей*\n" +
+      "```\n" +
+      ovpn_files.join("\n") +
+      "\n```";
 
-    bot.sendMessage(chat_id, info_message);
+    bot.sendMessage(chat_id, info_message, {
+      parse_mode: "Markdown",
+    });
   } catch (err) {
     logger.error(err.stack);
   }
@@ -123,7 +128,7 @@ bot.onText(`^\/connections(@${config.telegram.login})?$`, (msg) => {
     }
 
     const info_message =
-      "Список активных подключений:\n\n" +
+      "*Список активных подключений*\n" +
       "```\n" +
       JSON.stringify(connections, null, 2) +
       "\n```";
@@ -152,7 +157,7 @@ bot.onText(`^\/routes(@${config.telegram.login})?$`, (msg) => {
     }
 
     const info_message =
-      "Список маршрутов:\n\n" +
+      "*Список активных маршрутов*\n" +
       "```\n" +
       JSON.stringify(routes, null, 2) +
       "\n```";
