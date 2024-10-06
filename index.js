@@ -157,7 +157,9 @@ bot.onText(`^\/routes(@${config.telegram.login})?$`, (msg) => {
       JSON.stringify(routes, null, 2) +
       "\n```";
 
-    bot.sendMessage(chat_id, info_message);
+    bot.sendMessage(chat_id, info_message, {
+      parse_mode: "Markdown",
+    });
   } catch (err) {
     logger.error(err.stack);
   }
