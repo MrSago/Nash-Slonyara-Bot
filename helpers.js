@@ -96,7 +96,7 @@ function createOVPNFile(bot, chat_id, input_file, ovpn_file) {
   });
 }
 
-function makeOVPNFile(bot, file_name) {
+function makeOVPNFile(bot, msg, file_name) {
   // const user_login = msg.from.username;
   // const ovpn_file_first = `/root/${user_login}_first.ovpn`;
   // const ovpn_file_second = `/root/${user_login}_second.ovpn`;
