@@ -128,7 +128,9 @@ bot.onText(`^\/connections(@${config.telegram.login})?$`, (msg) => {
       JSON.stringify(connections) +
       "\n```";
 
-    bot.sendMessage(chat_id, info_message);
+    bot.sendMessage(chat_id, info_message, {
+      parse_mode: "Markdown",
+    });
   } catch (err) {
     logger.error(err.stack);
   }
