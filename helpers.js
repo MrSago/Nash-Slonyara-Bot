@@ -95,9 +95,26 @@ function createOVPNFile(bot, chat_id, input_file, ovpn_file) {
   });
 }
 
+function makeOVPNFile(file_name) {
+  // const user_login = msg.from.username;
+  // const ovpn_file_first = `/root/${user_login}_first.ovpn`;
+  // const ovpn_file_second = `/root/${user_login}_second.ovpn`;
+
+  const ovpn_file = `/root/${file_name}.ovpn`;
+
+  const tmp_input_file = `${os.tmpdir()}/${file_name}`;
+  const input = `1\n${file_name}\n1\n`;
+  fs.writeFileSync(tmp_input_file, input, "utf8");
+
+  if (!helpers.OVPNFileExists(bot, msg, ovpn_file)) {
+    helpers.createOVPNFile(bot, chat_id, tmp_input_file, file_name);
+  }
+}
+
 module.exports = {
   IsPrivateChat,
   UserInPrivateGroup,
   OVPNFileExists,
   createOVPNFile,
+  makeOVPNFile,
 };
