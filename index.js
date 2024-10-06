@@ -24,7 +24,7 @@ bot.onText(`^\/start(@${config.telegram.login})?$`, async (msg) => {
     }
 
     bot.sendMessage(chat_id, messages.start, {
-      parse_mode: "Markdown",
+      parse_mode: "html",
     });
   } catch (err) {
     logger.error(err.stack);
