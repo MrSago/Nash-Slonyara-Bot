@@ -55,7 +55,7 @@ async function MakeOVPNFile(bot, msg, file_name) {
   }
 }
 
-function RegisterOVPNFile(bot, chat_id, input_file, ovpn_file) {
+async function RegisterOVPNFile(bot, chat_id, input_file, ovpn_file) {
   const openvpn_config_file = "/root/openvpn-config.sh";
   if (!fs.existsSync(openvpn_config_file)) {
     logger.error(`File ${openvpn_config_file} not found!`);
@@ -69,24 +69,32 @@ function RegisterOVPNFile(bot, chat_id, input_file, ovpn_file) {
   child.stdout.pipe(process.stdout);
   child.stderr.pipe(process.stderr);
 
-  child.on("close", async (code) => {
-    logger.info(`Child process exited with code ${code}`);
+  await new Promise((resolve, reject) => {
+    child.on("close", async (code) => {
+      logger.info(`Child process exited with code ${code}`);
+      if (code !== 0) {
+        reject();
+        return;
+      }
 
-    fs.unlinkSync(input_file);
+      fs.unlinkSync(input_file);
 
-    const stream = fs.createReadStream(ovpn_file);
-    await bot
-      .sendDocument(
-        chat_id,
-        stream,
-        {},
-        {
-          contentType: "application/octet-stream",
-        }
-      )
-      .catch((err) => {
-        logger.error(err.stack);
-      });
+      const stream = fs.createReadStream(ovpn_file);
+      await bot
+        .sendDocument(
+          chat_id,
+          stream,
+          {},
+          {
+            contentType: "application/octet-stream",
+          }
+        )
+        .catch((err) => {
+          logger.error(err.stack);
+        });
+
+      resolve();
+    });
   });
 }
 
