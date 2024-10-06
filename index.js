@@ -72,8 +72,8 @@ bot.onText(`^\/ovpn(@${config.telegram.login})?$`, async (msg) => {
     const chat_id = msg.chat.id;
     await bot.sendMessage(chat_id, "Ваши ключи подготавливается, ожидайте...");
 
-    await ovpn.MakeOVPNFile(bot, msg, `${msg.from.username}_second`);
     await ovpn.MakeOVPNFile(bot, msg, `${msg.from.username}_first`);
+    await ovpn.MakeOVPNFile(bot, msg, `${msg.from.username}_second`);
 
     bot.sendMessage(chat_id, "Инструкция по установке /help.");
   } catch (err) {
