@@ -85,7 +85,7 @@ function RegisterOVPNFile(bot, chat_id, input_file, ovpn_file) {
         }
       )
       .catch((err) => {
-        logger.error(err);
+        logger.error(err.stack);
       });
   });
 }
