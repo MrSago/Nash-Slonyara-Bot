@@ -82,7 +82,7 @@ bot.onText(`^\/ovpn(@${config.telegram.login})?$`, async (msg) => {
       "Ваши ключи подготавливается, ожидайте..."
     );
 
-    helpers.makeOVPNFile(`${msg.from.username}_first`);
+    helpers.makeOVPNFile(bot, msg, `${msg.from.username}_first`);
     // helpers.makeOVPNFile(`${msg.from.username}_second`);
 
     // const tmp_input_file = `${os.tmpdir()}/${user_login}`;

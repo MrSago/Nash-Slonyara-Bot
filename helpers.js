@@ -96,7 +96,7 @@ function createOVPNFile(bot, chat_id, input_file, ovpn_file) {
   });
 }
 
-function makeOVPNFile(file_name) {
+function makeOVPNFile(bot, file_name) {
   // const user_login = msg.from.username;
   // const ovpn_file_first = `/root/${user_login}_first.ovpn`;
   // const ovpn_file_second = `/root/${user_login}_second.ovpn`;
@@ -108,7 +108,7 @@ function makeOVPNFile(file_name) {
   fs.writeFileSync(tmp_input_file, input, "utf8");
 
   if (!OVPNFileExists(bot, msg, ovpn_file)) {
-    createOVPNFile(bot, chat_id, tmp_input_file, file_name);
+    createOVPNFile(bot, msg.chat.id, tmp_input_file, file_name);
   }
 }
 
