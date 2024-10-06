@@ -1,10 +1,10 @@
 const fs = require("fs");
-const os = require("os");
 
 const config = require("./environment.js");
 const logger = require("./logger.js");
 const messages = require("./messages.js");
-const helpers = require("./helpers.js");
+const ovpn = require("./ovpn.js");
+const { IsPrivateChat, UserInPrivateGroup } = require("./helpers.js");
 
 const TelegramBot = require("node-telegram-bot-api");
 
@@ -16,10 +16,10 @@ bot.on("polling_error", (error) => {
   logger.error(error);
 });
 
-bot.onText(`^\/start(@${config.telegram.login})?$`, (msg) => {
+bot.onText(`^\/start(@${config.telegram.login})?$`, async (msg) => {
   try {
     const chat_id = msg.chat.id;
-    if (!helpers.UserInPrivateGroup(bot, msg, config.telegram.group_id)) {
+    if (!(await UserInPrivateGroup(bot, msg, config.telegram.group_id))) {
       return;
     }
 
@@ -31,9 +31,9 @@ bot.onText(`^\/start(@${config.telegram.login})?$`, (msg) => {
   }
 });
 
-bot.onText(`^\/help(@${config.telegram.login})?$`, (msg) => {
+bot.onText(`^\/help(@${config.telegram.login})?$`, async (msg) => {
   try {
-    if (!helpers.UserInPrivateGroup(bot, msg, config.telegram.group_id)) {
+    if (!(await UserInPrivateGroup(bot, msg, config.telegram.group_id))) {
       return;
     }
 
@@ -45,9 +45,9 @@ bot.onText(`^\/help(@${config.telegram.login})?$`, (msg) => {
   }
 });
 
-bot.onText(`^\/android(@${config.telegram.login})?$`, (msg) => {
+bot.onText(`^\/android(@${config.telegram.login})?$`, async (msg) => {
   try {
-    if (!helpers.UserInPrivateGroup(bot, msg, config.telegram.group_id)) {
+    if (!(await UserInPrivateGroup(bot, msg, config.telegram.group_id))) {
       return;
     }
 
@@ -61,19 +61,19 @@ bot.onText(`^\/android(@${config.telegram.login})?$`, (msg) => {
 
 bot.onText(`^\/ovpn(@${config.telegram.login})?$`, async (msg) => {
   try {
-    if (!helpers.UserInPrivateGroup(bot, msg, config.telegram.group_id)) {
+    if (!(await UserInPrivateGroup(bot, msg, config.telegram.group_id))) {
       return;
     }
 
-    if (!helpers.IsPrivateChat(bot, msg)) {
+    if (!IsPrivateChat(bot, msg)) {
       return;
     }
 
     const chat_id = msg.chat.id;
     await bot.sendMessage(chat_id, "Ваши ключи подготавливается, ожидайте...");
 
-    await helpers.MakeOVPNFile(bot, msg, `${msg.from.username}_first`);
-    await helpers.MakeOVPNFile(bot, msg, `${msg.from.username}_second`);
+    await ovpn.MakeOVPNFile(bot, msg, `${msg.from.username}_second`);
+    await ovpn.MakeOVPNFile(bot, msg, `${msg.from.username}_first`);
 
     bot.sendMessage(chat_id, "Инструкция по установке /help.");
   } catch (err) {
@@ -81,9 +81,9 @@ bot.onText(`^\/ovpn(@${config.telegram.login})?$`, async (msg) => {
   }
 });
 
-bot.onText(`^\/list(@${config.telegram.login})?$`, (msg) => {
+bot.onText(`^\/list(@${config.telegram.login})?$`, async (msg) => {
   try {
-    if (!helpers.UserInPrivateGroup(bot, msg, config.telegram.group_id)) {
+    if (!(await UserInPrivateGroup(bot, msg, config.telegram.group_id))) {
       return;
     }
 
@@ -100,6 +100,27 @@ bot.onText(`^\/list(@${config.telegram.login})?$`, (msg) => {
 
     const info_message =
       "Список зарегистрированных OpenVPN-ключей:\n\n" + ovpn_files.join("\n");
+
+    bot.sendMessage(chat_id, info_message);
+  } catch (err) {
+    logger.error(err.stack);
+  }
+});
+
+bot.onText(`^\/connections(@${config.telegram.login})?$`, async (msg) => {
+  try {
+    if (!(await UserInPrivateGroup(bot, msg, config.telegram.group_id))) {
+      return;
+    }
+
+    const chat_id = msg.chat.id;
+    const connections = ovpn.GetClientConnections();
+    if (connections === null) {
+      bot.sendMessage(chat_id, messages.internalError);
+      return;
+    }
+
+    const info_message = "Список активных подключений:\n\n" + connections;
 
     bot.sendMessage(chat_id, info_message);
   } catch (err) {
