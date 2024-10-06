@@ -107,13 +107,15 @@ bot.onText(`^\/list(@${config.telegram.login})?$`, async (msg) => {
   }
 });
 
-bot.onText(`^\/connections(@${config.telegram.login})?$`, async (msg) => {
+bot.onText(`^\/connections(@${config.telegram.login})?$`, (msg) => {
   try {
-    if (!(await UserInPrivateGroup(bot, msg, config.telegram.group_id))) {
+    const chat_id = msg.chat.id;
+
+    if (msg.from.id !== config.telegram.creator_id) {
+      bot.sendMessage(chat_id, "Эта команда доступна только создателю бота!");
       return;
     }
 
-    const chat_id = msg.chat.id;
     const connections = ovpn.GetClientConnections();
     if (connections === null) {
       bot.sendMessage(chat_id, messages.internalError);
@@ -129,13 +131,15 @@ bot.onText(`^\/connections(@${config.telegram.login})?$`, async (msg) => {
   }
 });
 
-bot.onText(`^\/routes(@${config.telegram.login})?$`, async (msg) => {
+bot.onText(`^\/routes(@${config.telegram.login})?$`, (msg) => {
   try {
-    if (!(await UserInPrivateGroup(bot, msg, config.telegram.group_id))) {
+    const chat_id = msg.chat.id;
+
+    if (msg.from.id !== config.telegram.creator_id) {
+      bot.sendMessage(chat_id, "Эта команда доступна только создателю бота!");
       return;
     }
 
-    const chat_id = msg.chat.id;
     const routes = ovpn.GetRoutingTable();
     if (routes === null) {
       bot.sendMessage(chat_id, messages.internalError);
