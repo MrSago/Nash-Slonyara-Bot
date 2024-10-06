@@ -82,25 +82,8 @@ bot.onText(`^\/ovpn(@${config.telegram.login})?$`, async (msg) => {
       "Ваши ключи подготавливается, ожидайте..."
     );
 
-    const is_first_created = helpers.MakeOVPNFile(
-      bot,
-      msg,
-      `${msg.from.username}_first`
-    );
-
-    if (!is_first_created) {
-      helpers.SendFile(bot, msg.chat.id, ovpn_file_first);
-    }
-
-    const is_second_created = helpers.MakeOVPNFile(
-      bot,
-      msg,
-      `${msg.from.username}_second`
-    );
-
-    if (!is_second_created) {
-      helpers.SendFile(bot, msg.chat.id, ovpn_file_second);
-    }
+    helpers.makeOVPNFile(bot, msg, `${msg.from.username}_first`);
+    helpers.makeOVPNFile(bot, msg, `${msg.from.username}_second`);
 
     // const tmp_input_file = `${os.tmpdir()}/${user_login}`;
     // const input_first = `1\n${user_login}_first\n1\n`;
