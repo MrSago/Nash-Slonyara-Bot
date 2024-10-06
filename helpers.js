@@ -32,36 +32,30 @@ async function UserInPrivateGroup(bot, msg, group_id) {
   return is_in_group;
 }
 
-function OVPNFileExists(bot, msg, ovpn_file) {
-  const is_file_exists = fs.existsSync(ovpn_file);
-  if (is_file_exists) {
-    const chat_id = msg.chat.id;
-    bot
-      .sendMessage(
-        chat_id,
-        "Ключ с вашим логином уже зарегистрирован в OpenVPN."
-      )
-      .then(() => {
-        const stream = fs.createReadStream(ovpn_file);
-        bot
-          .sendDocument(
-            chat_id,
-            stream,
-            {},
-            {
-              contentType: "application/octet-stream",
-            }
-          )
-          .then(() => {
-            bot.sendMessage(chat_id, "Инструкция по установке /help.");
-          });
-      })
-      .catch(logger.error);
+async function MakeOVPNFile(bot, msg, file_name) {
+  const ovpn_file = `/root/${file_name}.ovpn`;
+  const chat_id = msg.chat.id;
+
+  if (!fs.existsSync(ovpn_file)) {
+    const tmp_input_file = `${os.tmpdir()}/${file_name}`;
+    const input = `1\n${file_name}\n1\n`;
+    fs.writeFileSync(tmp_input_file, input, "utf8");
+
+    RegisterOVPNFile(bot, chat_id, tmp_input_file, file_name);
+  } else {
+    const stream = fs.createReadStream(ovpn_file);
+    await bot.sendDocument(
+      chat_id,
+      stream,
+      {},
+      {
+        contentType: "application/octet-stream",
+      }
+    );
   }
-  return is_file_exists;
 }
 
-function createOVPNFile(bot, chat_id, input_file, ovpn_file) {
+function RegisterOVPNFile(bot, chat_id, input_file, ovpn_file) {
   const openvpn_config_file = "/root/openvpn-config.sh";
   if (!fs.existsSync(openvpn_config_file)) {
     logger.error(`File ${openvpn_config_file} not found!`);
@@ -75,13 +69,13 @@ function createOVPNFile(bot, chat_id, input_file, ovpn_file) {
   child.stdout.pipe(process.stdout);
   child.stderr.pipe(process.stderr);
 
-  child.on("close", (code) => {
+  child.on("close", async (code) => {
     logger.info(`Child process exited with code ${code}`);
 
     fs.unlinkSync(input_file);
 
     const stream = fs.createReadStream(ovpn_file);
-    bot
+    await bot
       .sendDocument(
         chat_id,
         stream,
@@ -96,26 +90,8 @@ function createOVPNFile(bot, chat_id, input_file, ovpn_file) {
   });
 }
 
-function makeOVPNFile(bot, msg, file_name) {
-  // const user_login = msg.from.username;
-  // const ovpn_file_first = `/root/${user_login}_first.ovpn`;
-  // const ovpn_file_second = `/root/${user_login}_second.ovpn`;
-
-  const ovpn_file = `/root/${file_name}.ovpn`;
-
-  const tmp_input_file = `${os.tmpdir()}/${file_name}`;
-  const input = `1\n${file_name}\n1\n`;
-  fs.writeFileSync(tmp_input_file, input, "utf8");
-
-  if (!OVPNFileExists(bot, msg, ovpn_file)) {
-    createOVPNFile(bot, msg.chat.id, tmp_input_file, file_name);
-  }
-}
-
 module.exports = {
   IsPrivateChat,
   UserInPrivateGroup,
-  OVPNFileExists,
-  createOVPNFile,
-  makeOVPNFile,
+  MakeOVPNFile,
 };

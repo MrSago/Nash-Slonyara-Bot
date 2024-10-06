@@ -20,10 +20,6 @@ bot.onText(`^\/start(@${config.telegram.login})?$`, (msg) => {
   try {
     const chat_id = msg.chat.id;
     if (!helpers.UserInPrivateGroup(bot, msg, config.telegram.group_id)) {
-      bot.sendMessage(
-        chat_id,
-        "Этот бот доступен только участникам приватной группы! Ухади..."
-      );
       return;
     }
 
@@ -73,38 +69,19 @@ bot.onText(`^\/ovpn(@${config.telegram.login})?$`, async (msg) => {
       return;
     }
 
-    // const user_login = msg.from.username;
-    // const ovpn_file_first = `/root/${user_login}_first.ovpn`;
-    // const ovpn_file_second = `/root/${user_login}_second.ovpn`;
+    const chat_id = msg.chat.id;
+    await bot.sendMessage(chat_id, "Ваши ключи подготавливается, ожидайте...");
 
-    await bot.sendMessage(
-      msg.chat.id,
-      "Ваши ключи подготавливается, ожидайте..."
-    );
+    await helpers.MakeOVPNFile(bot, msg, `${msg.from.username}_first`);
+    await helpers.MakeOVPNFile(bot, msg, `${msg.from.username}_second`);
 
-    helpers.makeOVPNFile(bot, msg, `${msg.from.username}_first`);
-    helpers.makeOVPNFile(bot, msg, `${msg.from.username}_second`);
-
-    // const tmp_input_file = `${os.tmpdir()}/${user_login}`;
-    // const input_first = `1\n${user_login}_first\n1\n`;
-    // fs.writeFileSync(tmp_input_file, input_first, "utf8");
-
-    // if (!helpers.OVPNFileExists(bot, msg, ovpn_file_first)) {
-    //   helpers.createOVPNFile(bot, chat_id, tmp_input_file, ovpn_file_first);
-    // }
-
-    // const input_second = `1\n${user_login}_second\n1\n`;
-    // fs.writeFileSync(tmp_input_file, input_second, "utf8");
-
-    // if (!helpers.OVPNFileExists(bot, msg, ovpn_file_second)) {
-    //   helpers.createOVPNFile(bot, chat_id, tmp_input_file, ovpn_file_second);
-    // }
+    bot.sendMessage(chat_id, "Инструкция по установке /help.");
   } catch (err) {
     logger.error(err.stack);
   }
 });
 
-bot.onText(`^\/list(@${config.telegram.login})?$`, async (msg) => {
+bot.onText(`^\/list(@${config.telegram.login})?$`, (msg) => {
   try {
     if (!helpers.UserInPrivateGroup(bot, msg, config.telegram.group_id)) {
       return;
