@@ -107,8 +107,8 @@ function makeOVPNFile(file_name) {
   const input = `1\n${file_name}\n1\n`;
   fs.writeFileSync(tmp_input_file, input, "utf8");
 
-  if (!helpers.OVPNFileExists(bot, msg, ovpn_file)) {
-    helpers.createOVPNFile(bot, chat_id, tmp_input_file, file_name);
+  if (!OVPNFileExists(bot, msg, ovpn_file)) {
+    createOVPNFile(bot, chat_id, tmp_input_file, file_name);
   }
 }
 
