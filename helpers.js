@@ -41,7 +41,7 @@ async function MakeOVPNFile(bot, msg, file_name) {
     const input = `1\n${file_name}\n1\n`;
     fs.writeFileSync(tmp_input_file, input, "utf8");
 
-    RegisterOVPNFile(bot, chat_id, tmp_input_file, file_name);
+    RegisterOVPNFile(bot, chat_id, tmp_input_file, ovpn_file);
   } else {
     const stream = fs.createReadStream(ovpn_file);
     await bot.sendDocument(
