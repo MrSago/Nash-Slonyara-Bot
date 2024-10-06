@@ -135,7 +135,7 @@ function ParseRoutingTable(data) {
   for (let i = routing_table_index + 1; i < global_stats_index; ++i) {
     const [virtualAddress, commonName, realAddress, lastRef] =
       lines[i].split(",");
-    users[virtualAddress] = {
+    routes[virtualAddress] = {
       commonName,
       realAddress,
       lastRef,
