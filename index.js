@@ -125,7 +125,7 @@ bot.onText(`^\/connections(@${config.telegram.login})?$`, (msg) => {
     const info_message =
       "Список активных подключений:\n\n" +
       "```\n" +
-      JSON.stringify(connections) +
+      JSON.stringify(connections, null, 2) +
       "\n```";
 
     bot.sendMessage(chat_id, info_message, {
@@ -151,7 +151,11 @@ bot.onText(`^\/routes(@${config.telegram.login})?$`, (msg) => {
       return;
     }
 
-    const info_message = "Список маршрутов:\n\n" + JSON.stringify(routes);
+    const info_message =
+      "Список маршрутов:\n\n" +
+      "```\n" +
+      JSON.stringify(routes, null, 2) +
+      "\n```";
 
     bot.sendMessage(chat_id, info_message);
   } catch (err) {
