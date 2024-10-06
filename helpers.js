@@ -80,18 +80,14 @@ async function RegisterOVPNFile(bot, chat_id, input_file, ovpn_file) {
       fs.unlinkSync(input_file);
 
       const stream = fs.createReadStream(ovpn_file);
-      await bot
-        .sendDocument(
-          chat_id,
-          stream,
-          {},
-          {
-            contentType: "application/octet-stream",
-          }
-        )
-        .catch((err) => {
-          logger.error(err.stack);
-        });
+      await bot.sendDocument(
+        chat_id,
+        stream,
+        {},
+        {
+          contentType: "application/octet-stream",
+        }
+      );
 
       resolve();
     });
