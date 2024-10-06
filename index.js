@@ -8,9 +8,9 @@ const helpers = require("./helpers.js");
 
 const TelegramBot = require("node-telegram-bot-api");
 
-logger.init("info");
-
 const bot = new TelegramBot(config.telegram.token, { polling: true });
+
+logger.init("info");
 
 bot.on("polling_error", (error) => {
   logger.error(error);
@@ -74,18 +74,26 @@ bot.onText(`^\/ovpn(@${config.telegram.login})?$`, async (msg) => {
     }
 
     const user_login = msg.from.username;
-    const ovpn_file = `/root/${user_login}.ovpn`;
-    if (helpers.OVPNFileExists(bot, msg, ovpn_file)) {
-      return;
-    }
+    const ovpn_file_first = `/root/${user_login}_first.ovpn`;
+    const ovpn_file_second = `/root/${user_login}_second.ovpn`;
 
     const chat_id = msg.chat.id;
-    await bot.sendMessage(chat_id, "Ваш файлик подготавливается, ожидайте...");
+    await bot.sendMessage(chat_id, "Ваши ключи подготавливается, ожидайте...");
 
     const tmp_input_file = `${os.tmpdir()}/${user_login}`;
-    fs.writeFileSync(tmp_input_file, `1\n${user_login}\n1\n`, "utf8");
+    let input = `1\n${user_login}_first\n1\n`;
+    fs.writeFileSync(tmp_input_file, input, "utf8");
 
-    helpers.createOVPNFile(bot, chat_id, tmp_input_file, ovpn_file);
+    if (!helpers.OVPNFileExists(bot, msg, ovpn_file_first)) {
+      helpers.createOVPNFile(bot, chat_id, tmp_input_file, ovpn_file_first);
+    }
+
+    input = `1\n${user_login}_second\n1\n`;
+    fs.writeFileSync(tmp_input_file, input, "utf8");
+
+    if (!helpers.OVPNFileExists(bot, msg, ovpn_file_second)) {
+      helpers.createOVPNFile(bot, chat_id, tmp_input_file, ovpn_file_second);
+    }
   } catch (err) {
     logger.error(err.stack);
   }

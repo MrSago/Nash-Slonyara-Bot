@@ -89,9 +89,6 @@ function createOVPNFile(bot, chat_id, input_file, ovpn_file) {
           contentType: "application/octet-stream",
         }
       )
-      .then(() => {
-        bot.sendMessage(chat_id, "Инструкция по установке /help.");
-      })
       .catch((err) => {
         logger.error(err);
       });
