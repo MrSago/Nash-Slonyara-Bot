@@ -81,15 +81,15 @@ bot.onText(`^\/ovpn(@${config.telegram.login})?$`, async (msg) => {
     await bot.sendMessage(chat_id, "Ваши ключи подготавливается, ожидайте...");
 
     const tmp_input_file = `${os.tmpdir()}/${user_login}`;
-    let input = `1\n${user_login}_first\n1\n`;
-    fs.writeFileSync(tmp_input_file, input, "utf8");
+    const input_first = `1\n${user_login}_first\n1\n`;
+    fs.writeFileSync(tmp_input_file, input_first, "utf8");
 
     if (!helpers.OVPNFileExists(bot, msg, ovpn_file_first)) {
       helpers.createOVPNFile(bot, chat_id, tmp_input_file, ovpn_file_first);
     }
 
-    input = `1\n${user_login}_second\n1\n`;
-    fs.writeFileSync(tmp_input_file, input, "utf8");
+    const input_second = `1\n${user_login}_second\n1\n`;
+    fs.writeFileSync(tmp_input_file, input_second, "utf8");
 
     if (!helpers.OVPNFileExists(bot, msg, ovpn_file_second)) {
       helpers.createOVPNFile(bot, chat_id, tmp_input_file, ovpn_file_second);
