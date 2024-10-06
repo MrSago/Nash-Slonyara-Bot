@@ -42,6 +42,20 @@ function GetClientConnections() {
   return result;
 }
 
+function GetRoutingTable() {
+  const status_file = "/var/log/openvpn/status.log";
+
+  if (!fs.existsSync(status_file)) {
+    logger.error(`File ${status_file} not found!`);
+    return null;
+  }
+
+  const data = fs.readFileSync(status_file, "utf8");
+  const result = ParseRoutingTable(data);
+
+  return result;
+}
+
 async function RegisterOVPNFile(bot, chat_id, input_file, ovpn_file) {
   const openvpn_config_file = "/root/openvpn-config.sh";
 
@@ -134,4 +148,5 @@ function ParseRoutingTable(data) {
 module.exports = {
   MakeOVPNFile,
   GetClientConnections,
+  GetRoutingTable,
 };

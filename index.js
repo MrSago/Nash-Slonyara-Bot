@@ -120,7 +120,29 @@ bot.onText(`^\/connections(@${config.telegram.login})?$`, async (msg) => {
       return;
     }
 
-    const info_message = "Список активных подключений:\n\n" + JSON.stringify(connections);
+    const info_message =
+      "Список активных подключений:\n\n" + JSON.stringify(connections);
+
+    bot.sendMessage(chat_id, info_message);
+  } catch (err) {
+    logger.error(err.stack);
+  }
+});
+
+bot.onText(`^\/routes(@${config.telegram.login})?$`, async (msg) => {
+  try {
+    if (!(await UserInPrivateGroup(bot, msg, config.telegram.group_id))) {
+      return;
+    }
+
+    const chat_id = msg.chat.id;
+    const routes = ovpn.GetRoutingTable();
+    if (routes === null) {
+      bot.sendMessage(chat_id, messages.internalError);
+      return;
+    }
+
+    const info_message = "Список маршрутов:\n\n" + JSON.stringify(routes);
 
     bot.sendMessage(chat_id, info_message);
   } catch (err) {
