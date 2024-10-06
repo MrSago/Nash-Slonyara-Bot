@@ -123,7 +123,10 @@ bot.onText(`^\/connections(@${config.telegram.login})?$`, (msg) => {
     }
 
     const info_message =
-      "Список активных подключений:\n\n" + JSON.stringify(connections);
+      "Список активных подключений:\n\n" +
+      "```\n" +
+      JSON.stringify(connections) +
+      "\n```";
 
     bot.sendMessage(chat_id, info_message);
   } catch (err) {
