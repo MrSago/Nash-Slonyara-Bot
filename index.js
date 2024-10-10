@@ -10,6 +10,8 @@ const TelegramBot = require("node-telegram-bot-api");
 
 const bot = new TelegramBot(config.telegram.token, { polling: true });
 
+const MONTH_COST = 600;
+
 logger.init("info");
 
 bot.on("polling_error", (error) => {
@@ -107,6 +109,22 @@ bot.onText(`^\/list(@${config.telegram.login})?$`, async (msg) => {
     bot.sendMessage(chat_id, info_message, {
       parse_mode: "Markdown",
     });
+  } catch (err) {
+    logger.error(err.stack);
+  }
+});
+
+bot.onText(`^\/cost(@${config.telegram.login})?$`, async (msg) => {
+  try {
+    if (!(await UserInPrivateGroup(bot, msg, config.telegram.group_id))) {
+      return;
+    }
+
+    const cost = MONTH_COST;
+    const count = bot.getChatMemberCount(config.telegram.group_id);
+    const message = messages.cost(cost, count);
+
+    bot.sendMessage(msg.chat.id, message);
   } catch (err) {
     logger.error(err.stack);
   }

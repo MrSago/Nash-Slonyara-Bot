@@ -6,6 +6,7 @@ const start =
   "/android - рекомендуемые настройки для Android\n" +
   "/ovpn - получение OpenVPN-ключа\n" +
   "/list - список зарегистрированных OpenVPN-ключей\n" +
+  "/cost - стоимость аренды сервера\n" +
   "<tg-spoiler>/connections - список активных подключений (только для создателя бота)</tg-spoiler>\n" +
   "<tg-spoiler>/routes - список активных маршрутов (только для создателя бота)</tg-spoiler>";
 
@@ -21,11 +22,23 @@ const help =
 
 const android = "Рекомендуемые настройки для Android: (soon)";
 
+function cost(cost, members_count) {
+  return (
+    "*Стоимость аренды сервера*\n\n" +
+    "```\n" +
+    `Цена: ${cost}₽ за месяц\n` +
+    `Включает в себя: 2 VPN-ключа\n` +
+    `Стоимость: ${cost / members_count}₽ за месяц\n` +
+    "\n```"
+  );
+}
+
 const internalError = "Произошла внутренняя ошибка бота.";
 
 module.exports = {
   start,
   help,
   android,
+  cost,
   internalError,
 };
